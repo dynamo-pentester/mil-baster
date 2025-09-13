@@ -1,0 +1,6 @@
+cryptography==45.0.0
+pycryptodome==3.20.0
+web3==7.13.0
+python-dotenv==1.0.1
+sqlite-utils==3.36
+flask==3.0.3   # optional dashboard
