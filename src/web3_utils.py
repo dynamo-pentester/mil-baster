@@ -1,7 +1,3 @@
-# web3_placeholder.py
-# Example of how to send an onchain log once you have Infura and private key configured.
-# DO NOT put private keys into code for real deployment. For demo, use env vars or .env and keep secret.
-
 import os
 from web3 import Web3
 import json

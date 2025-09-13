@@ -1,6 +1,26 @@
+# Enhanced MIL-BASTER Dependencies (Windows-compatible)
 cryptography==45.0.0
 pycryptodome==3.20.0
 web3==7.13.0
 python-dotenv==1.0.1
+
+# Database & Storage
 sqlite-utils==3.36
-flask==3.0.3   # optional dashboard
+
+# Web Dashboard
+flask==3.0.3
+flask-socketio==5.3.6
+eventlet==0.33.3
+
+# Data Visualization & Processing
+plotly==5.17.0
+pandas==2.1.4
+numpy==1.26.2
+
+# Network Simulation & Math
+networkx==3.2.1
+scipy==1.11.4
+
+# Optional: Development tools
+pytest==7.4.3
+black==23.12.0
