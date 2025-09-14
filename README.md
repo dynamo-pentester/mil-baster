@@ -18,6 +18,9 @@ Military communication networks are vulnerable to:
 - ✅ **Onion routing** with ECC encryption (ECDSA + ECDH → AES)
 - ✅ **Blockchain audit trail** (tamper-proof event logs)
 - ✅ **Adaptive routing** (excludes untrustworthy nodes)
+- deployed using REMIX IDE 
+- <img width="1919" height="971" alt="image" src="https://github.com/user-attachments/assets/46ad9e9e-cbfd-41bb-9362-99c5672e7c43" />
+
 
 ## 🚀 **Quick Start**
 
@@ -61,3 +64,4 @@ text
 
 ---
 *Built for defense-grade deployment in UAV swarms, soldier mesh networks, and vehicle-
+
