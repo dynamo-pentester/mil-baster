@@ -8,8 +8,6 @@ Next-generation secure routing with dynamic trust management and tamper-proof au
 
 Military communication networks are highly susceptible to sophisticated threats, including data tampering, packet dropping, and identity compromise. Current solutions lack a robust, dynamic trust management system and a tamper-proof mechanism for auditing network anomalies, making them vulnerable to insider attacks and operational disruptions.
 
-![Attack](https://github.com/user-attachments/assets/6a0d0a12-f1ef-498f-a6d6-786647e6d1fa)
-
 ## ⚡ Our Solution
 
 MIL-BASTER is a comprehensive security framework for Mobile Ad-hoc Networks (MANETs) that integrates real-time anomaly detection, dynamic trust management, and a blockchain-based audit trail. This solution ensures the integrity, confidentiality, and resilience of critical communication, providing a self-healing and secure network environment for military applications.
@@ -40,8 +38,6 @@ ECDH Key Exchange: Establishes secure, ephemeral session keys between nodes.
 AES-GCM: Guarantees confidentiality and authenticated encryption of the data payload.
 
 - Blockchain Audit Trail: All security-relevant events, including trust score updates and anomaly logs, are recorded on a blockchain. This provides a decentralized, tamper-proof, and transparent record for forensic analysis and accountability.
-
-![Blockchain](https://github.com/user-attachments/assets/bbf7b81f-e4d3-4a67-89f6-7ffdca43510e)
 
 - Adaptive Routing: The system intelligently selects the most trustworthy and efficient routing paths, dynamically adapting to exclude compromised or low-trust nodes, thereby enhancing network resilience.
 
@@ -150,5 +146,6 @@ MIT License
 
 ---
 Built for defense-grade deployment in UAV swarms, soldier mesh networks, and vehicle-to-vehicle communication.
+
 
 
