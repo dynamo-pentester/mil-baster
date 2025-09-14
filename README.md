@@ -1,76 +1,116 @@
 # 🛡️ MIL-BASTER: Military-Grade Blockchain-Assisted Secure Routing
 
-**Next-generation secure routing with dynamic trust management and tamper-proof audit trails for Mobile Ad-hoc Networks (MANETs)**
+Next-generation secure routing with dynamic trust management and tamper-proof audit trails for Mobile Ad-hoc Networks (MANETs)
 
-## 🎯 **Problem Statement**
+![Intro](https://media.giphy.com/media/du3J3cXyzhj75IOgvA/giphy.gif)
 
-Military communication networks are vulnerable to:
-- ❌ Malicious nodes dropping/tampering packets
-- ❌ No trust management to exclude bad actors
-- ❌ No tamper-proof audit of anomalies
-- ❌ Identity/location leaks if devices captured
+## 🎯 Problem Statement
 
-## ⚡ **Our Solution**
+Military communication networks are highly susceptible to sophisticated threats, including data tampering, packet dropping, and identity compromise. Current solutions lack a robust, dynamic trust management system and a tamper-proof mechanism for auditing network anomalies, making them vulnerable to insider attacks and operational disruptions.
 
-**MIL-BASTER** provides:
-- ✅ **Real-time anomaly detection** (sliding window analysis)
-- ✅ **Dynamic trust scoring** (-20 drop, +1 success, exclude <50)
-- ✅ **Onion routing** with ECC encryption (ECDSA + ECDH → AES)
-- ✅ **Blockchain audit trail** (tamper-proof event logs)
-- ✅ **Adaptive routing** (excludes untrustworthy nodes)
-- deployed using REMIX IDE
-- <img width="1919" height="971" alt="image" src="https://github.com/user-attachments/assets/46ad9e9e-cbfd-41bb-9362-99c5672e7c43" />
+![Attack](https://github.com/user-attachments/assets/6a0d0a12-f1ef-498f-a6d6-786647e6d1fa)
 
-## 🚀 **Quick Start**
+## ⚡ Our Solution
 
-    1. Clone repository
-    git clone https://github.com/dynamo-pentester/mil-baster.git
-    cd mil-baster
+MIL-BASTER is a comprehensive security framework for Mobile Ad-hoc Networks (MANETs) that integrates real-time anomaly detection, dynamic trust management, and a blockchain-based audit trail. This solution ensures the integrity, confidentiality, and resilience of critical communication, providing a self-healing and secure network environment for military applications.
 
-    2. Setup environment
-    python -m venv venv
-    source venv/bin/activate # Windows: venv\Scripts\activate
+Key Features:
+- Real-time Anomaly Detection: Utilizes a sliding window analysis to immediately identify and flag anomalous behavior, such as dropped packets or unauthorized data manipulation.
 
-    3. Install dependencies
-    pip install -r requirements.txt
+![Detection](https://github.com/user-attachments/assets/c53140aa-2a55-4ad5-840d-b7edb7737b29)
 
-    4. Configure environment variables (optional for blockchain features)
-    # Create .env file with:
-    INFURA_SEPOLIA_URL=your_infura_sepolia_rpc_url
-    DEMO_PRIVATE_KEY=your_private_key
-    DEMO_ACCOUNT=your_account_address
-    CONTRACT_ADDR=deployed_contract_address
+- Dynamic Trust Scoring: Employs a reputation-based system where each node's trust score is dynamically adjusted based on its network behavior.
 
-    5. Run simulation
-    python -m src.sim_runner
+![Trust](https://media.giphy.com/media/l41lVsYDBC0UVQJCE/giphy.gif)
 
-## 🔐 **Technology Stack**
-- **Simulation**: Python 3.11 + asyncio
-- **Cryptography**: ECDSA signatures, ECDH key exchange, AES-GCM
-- **Database**: SQLite (local), PostgreSQL (production)
-- **Blockchain**: Solidity + Web3.py → Sepolia testnet
-- **Monitoring**: Real-time trust scoring + anomaly detection
-- **Web Dashboard**: Flask + SocketIO + Plotly
+Successful packet transmission: +1 point
 
-## 📊 **Demo Output**
-🎯 SIMULATION STARTED: 6 nodes, Node 5 is malicious
-[ANOMALY] 🚨 Node 5 dropped packet from 0→4, Trust: 100 → 80
-[TRUST] 🔒 Excluding low-trust nodes ['5'] from routing
+Packet drop or tampering: -20 points
 
-## 🏗️ **Architecture**
+Nodes with a score below 50 are automatically excluded from routing.
+
+- Onion Routing with ECC Encryption: Provides a multi-layered cryptographic approach to secure data.
+
+![Encryption](https://github.com/user-attachments/assets/8afbd3c3-0bbb-4197-81d8-8f98f4b66f66)
+
+ECDSA Signatures: Ensures data origin authentication and integrity.
+
+ECDH Key Exchange: Establishes secure, ephemeral session keys between nodes.
+
+AES-GCM: Guarantees confidentiality and authenticated encryption of the data payload.
+
+- Blockchain Audit Trail: All security-relevant events, including trust score updates and anomaly logs, are recorded on a blockchain. This provides a decentralized, tamper-proof, and transparent record for forensic analysis and accountability.
+
+![Blockchain](https://github.com/user-attachments/assets/bbf7b81f-e4d3-4a67-89f6-7ffdca43510e)
+
+- Adaptive Routing: The system intelligently selects the most trustworthy and efficient routing paths, dynamically adapting to exclude compromised or low-trust nodes, thereby enhancing network resilience.
+
+## 🚀 Quick Start
+
+To run the MIL-BASTER simulation, follow these steps:
+
+1. Clone the repository:
+```
+git clone https://github.com/dynamo-pentester/mil-baster.git
+cd mil-baster
+```
+
+2. Set up the Python virtual environment:
+```
+python -m venv venv
+source venv/bin/activate  # Use 'venv\Scripts\activate' on Windows
+```
+
+3. Install the required dependencies:
+```
+pip install -r requirements.txt
+```
+
+4. Configure environment variables (optional for blockchain features):
+Create a `.env` file with:
+```
+INFURA_SEPOLIA_URL=your_infura_sepolia_rpc_url
+DEMO_PRIVATE_KEY=your_private_key
+DEMO_ACCOUNT=your_account_address
+CONTRACT_ADDR=deployed_contract_address
+```
+
+5. Run the simulation:
+```
+python -m src.sim_runner
+```
+
+## 🔐 Technology Stack
+
+- Simulation: Python 3.11 with asyncio for concurrent network simulations.
+- Cryptography: Implemented using industry-standard libraries for ECDSA, ECDH, and AES-GCM.
+- Database: SQLite for local node data persistence and PostgreSQL for scalable, production-grade network-wide data management.
+- Blockchain: A custom Solidity smart contract is deployed on the Sepolia test network, with interactions managed via Web3.py.
+- Monitoring: Real-time dashboards and logs provide insights into trust scores and anomaly detection events.
+- Web Dashboard: Flask + SocketIO + Plotly for real-time visualization.
+
+## 📊 Demo Output
+
+🎯 SIMULATION STARTED: 100 nodes, several malicious nodes present
+[ANOMALY] 🚨 Node 45 dropped packet from 12→78, Trust: 100 → 80
+[TRUST] 🔒 Excluding low-trust nodes from routing
+
+## 🏗️ Architecture
+
+The MIL-BASTER architecture is designed for modularity and scalability. Each network node runs a micro-service-based stack:
+
 [MANET Nodes] → [Anomaly Detection] → [Trust Engine] → [SQLite DB]
 ↓
-[Blockchain Logger] → [Sepolia Testnet]
+[Blockchain Integration]
 
-## 📈 **Key Features**
-- **Trust Management**: Dynamic scoring with automatic exclusion
-- **Cryptographic Security**: Military-grade ECC + AES encryption
-- **Blockchain Audit**: Tamper-proof event logging on Sepolia
-- **Network Resilience**: Self-healing routes around malicious nodes
-- **Web Dashboard**: Real-time monitoring and visualization
-- **Pseudonym Rotation**: Privacy-preserving identity management
+- MANET Nodes: Simulates the physical hardware, including communication interfaces.
+- Anomaly Detection: A service that monitors packet flow and network behavior.
+- Trust Engine: A core service that calculates and updates node trust scores.
+- SQLite DB: Stores local trust scores and historical data for quick access.
+- Blockchain Integration: A service responsible for hashing and logging critical events onto the Sepolia testnet.
 
-## 📁 **Project Structure**
+## 📁 Project Structure
+
 - `src/`: Core simulation and protocol implementation
   - `sim_runner.py`: Main simulation orchestrator
   - `aodv_protocol.py`: AODV routing protocol with security extensions
@@ -85,26 +125,30 @@ Military communication networks are vulnerable to:
 - `scripts/`: Deployment and demo scripts
 - `MILBASTERLog_abi.json`: ABI for the smart contract
 
-## 🌐 **Web Dashboard**
+## 🌐 Web Dashboard
+
 Start the real-time monitoring dashboard:
 ```
 run dashboard.html
 ```
 Access at http://localhost:5000 for live network visualization.
 
-## 🧪 **Testing**
+## 🧪 Testing
+
 Run unit tests:
 ```
 pytest
 ```
 
-## 🤝 **Contributing**
+## 🤝 Contributing
+
 Contributions welcome! Please open issues or PRs for improvements.
 
-## 📄 **License**
+## 📄 License
+
 MIT License
 
 ---
-*Built for defense-grade deployment in UAV swarms, soldier mesh networks, and vehicle-to-vehicle networks*
+Built for defense-grade deployment in UAV swarms, soldier mesh networks, and vehicle-to-vehicle communication.
 
 
