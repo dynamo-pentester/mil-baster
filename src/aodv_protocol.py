@@ -1,19 +1,18 @@
-# src/aodv_protocol.py
+# aodv_protocol.py
 # AODV Protocol messages: RREQ, RREP, RERR, HELLO
 
 import time
-import json
 from dataclasses import dataclass, field
-from typing import List, Set, Optional
+from typing import List, Optional
 from .models import AODVNode
 
 @dataclass
 class AODVMessage:
     """Base AODV message"""
-    msg_type: str
     src_id: str
     dst_id: str
-    timestamp: float = field(default_factory=time.time)
+    msg_type: str = field(init=False)
+    timestamp: float = field(default_factory=time.time, init=False)
 
 @dataclass  
 class RouteRequest(AODVMessage):
@@ -67,10 +66,10 @@ class AODVProtocol:
         """Send HELLO message to discover/maintain neighbors"""
         if time.time() - self.last_hello < self.hello_interval:
             return
-            
+        
         hello_msg = HelloMessage(
             src_id=self.node.node_id,
-            dst_id="BROADCAST", 
+            dst_id="BROADCAST",
             position=self.node.position,
             energy_level=self.node.energy_level
         )

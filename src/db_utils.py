@@ -1,7 +1,11 @@
+# db_utils.py
+# Simple SQLite wrapper to store encrypted evidence and event hashes.
+
 import sqlite3
 import os
+import time
 
-DB_PATH = os.path.join(os.getcwd(), "milbaster.db")
+DB_PATH = os.path.join(os.path.dirname(__file__), "milbaster.db")
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -26,7 +30,9 @@ def init_db():
     conn.commit()
     conn.close()
 
-def save_evidence(event_hash: str, encrypted_blob: bytes, ts: int):
+def save_evidence(event_hash: str, encrypted_blob: bytes, ts: int = None):
+    if ts is None:
+        ts = int(time.time())
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("INSERT OR IGNORE INTO evidence (event_hash, encrypted_evidence, created_at) VALUES (?,?,?)",
@@ -34,7 +40,9 @@ def save_evidence(event_hash: str, encrypted_blob: bytes, ts: int):
     conn.commit()
     conn.close()
 
-def save_trust(node_id: str, trust_score: int, reason: str, ts: int):
+def save_trust(node_id: str, trust_score: int, reason: str, ts: int = None):
+    if ts is None:
+        ts = int(time.time())
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("INSERT INTO trust_history (node_id, trust_score, reason, ts) VALUES (?,?,?,?)",

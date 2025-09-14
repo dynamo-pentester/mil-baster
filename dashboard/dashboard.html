@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MIL-BASTER Secure Network Dashboard</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-light">
+<div class="container py-4">
+  <h1 class="text-center mb-4">⚔️ MIL-BASTER Real-Time Dashboard</h1>
+
+  <div class="row">
+    <div class="col-md-6">
+      <canvas id="trustChart"></canvas>
+    </div>
+    <div class="col-md-6">
+      <canvas id="incidentsChart"></canvas>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-md-12">
+      <div id="connectivityGauge"></div>
+    </div>
+  </div>
+
+  <h3 class="mt-5">📜 Blockchain Logs</h3>
+  <pre id="blockchainLogs" class="bg-black p-3 rounded"></pre>
+</div>
+
+<script>
+async function fetchStats() {
+  const res = await fetch("/stats");
+  return res.json();
+}
+
+async function fetchLogs() {
+  const res = await fetch("/blockchain_logs");
+  return res.json();
+}
+
+function renderCharts(stats) {
+  // Trust Distribution
+  const trustData = {
+    labels: ["Average Trust", "Low Trust Nodes", "Malicious Nodes"],
+    datasets: [{
+      data: [stats.average_trust, stats.low_trust_nodes, stats.malicious_nodes],
+      backgroundColor: ["#4caf50", "#ff9800", "#f44336"]
+    }]
+  };
+  new Chart(document.getElementById("trustChart"), {
+    type: "doughnut",
+    data: trustData
+  });
+
+  // Security Incidents Over Time
+  const incidentsData = {
+    labels: ["Anomalies", "Blockchain Events", "Pseudonym Rotations"],
+    datasets: [{
+      data: [stats.anomalies_detected, stats.blockchain_events, stats.pseudonym_rotations],
+      backgroundColor: ["#f44336", "#2196f3", "#9c27b0"]
+    }]
+  };
+  new Chart(document.getElementById("incidentsChart"), {
+    type: "bar",
+    data: incidentsData
+  });
+
+  // Connectivity Gauge
+  const gaugeData = [{
+    type: "indicator",
+    mode: "gauge+number",
+    value: stats.network_connectivity,
+    title: { text: "Network Connectivity (%)" },
+    gauge: { axis: { range: [0,100] }, bar: { color: "lime" } }
+  }];
+  Plotly.newPlot("connectivityGauge", gaugeData);
+}
+
+async function updateDashboard() {
+  const stats = await fetchStats();
+  renderCharts(stats);
+  const logs = await fetchLogs();
+  document.getElementById("blockchainLogs").innerText = JSON.stringify(logs, null, 2);
+}
+
+setInterval(updateDashboard, 5000); // refresh every 5s
+updateDashboard();
+</script>
+</body>
+</html>
