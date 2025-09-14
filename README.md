@@ -88,7 +88,7 @@ Military communication networks are vulnerable to:
 ## 🌐 **Web Dashboard**
 Start the real-time monitoring dashboard:
 ```
-python dashboard/app.py
+run dashboard.html
 ```
 Access at http://localhost:5000 for live network visualization.
 
@@ -106,4 +106,5 @@ MIT License
 
 ---
 *Built for defense-grade deployment in UAV swarms, soldier mesh networks, and vehicle-to-vehicle networks*
+
 
