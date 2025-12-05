@@ -1,93 +1,1012 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>MIL-BASTER Secure Network Dashboard</title>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIL-BASTER Advanced Tactical Dashboard</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --military-green: #1a4f3a;
+            --military-dark: #0d1b2a;
+            --military-accent: #00ff41;
+            --warning-orange: #ff6b35;
+            --danger-red: #e63946;
+            --info-blue: #457b9d;
+            --success-green: #2d5016;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--military-dark) 0%, #1e3a8a 100%);
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .main-header {
+            background: linear-gradient(90deg, var(--military-green) 0%, var(--military-dark) 100%);
+            border-bottom: 3px solid var(--military-accent);
+            box-shadow: 0 4px 20px rgba(0, 255, 65, 0.3);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .main-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-shadow: 0 0 20px var(--military-accent);
+            color: var(--military-accent);
+            text-align: center;
+            margin: 0;
+        }
+
+        .status-bar {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--military-accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .metric-card {
+            background: linear-gradient(145deg, rgba(26, 79, 58, 0.8) 0%, rgba(13, 27, 42, 0.9) 100%);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .metric-card:hover::before {
+            left: 100%;
+        }
+
+        .metric-card:hover {
+            border-color: var(--military-accent);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 255, 65, 0.2);
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--military-accent);
+            text-shadow: 0 0 10px var(--military-accent);
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            margin-top: 0.5rem;
+        }
+
+        .chart-container {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border: 1px solid var(--military-accent);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .chart-title {
+            color: var(--military-accent);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .network-topology {
+            background: radial-gradient(circle at center, rgba(0, 255, 65, 0.1) 0%, rgba(0, 0, 0, 0.8) 70%);
+            border-radius: 12px;
+            border: 2px solid var(--military-accent);
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .node {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid;
+            animation: pulse 2s infinite;
+            cursor: pointer;
+        }
+
+        .node.trusted { 
+            background: var(--military-accent); 
+            border-color: var(--military-accent);
+            box-shadow: 0 0 15px var(--military-accent);
+        }
+        .node.malicious { 
+            background: var(--danger-red); 
+            border-color: var(--danger-red);
+            box-shadow: 0 0 15px var(--danger-red);
+        }
+        .node.low-trust { 
+            background: var(--warning-orange); 
+            border-color: var(--warning-orange);
+            box-shadow: 0 0 15px var(--warning-orange);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .alert-panel {
+            background: linear-gradient(145deg, rgba(230, 57, 70, 0.2) 0%, rgba(0, 0, 0, 0.8) 100%);
+            border: 1px solid var(--danger-red);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .alert-item {
+            padding: 0.5rem;
+            margin: 0.3rem 0;
+            border-left: 3px solid var(--danger-red);
+            background: rgba(230, 57, 70, 0.1);
+            border-radius: 4px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .progress-ring {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto;
+        }
+
+        .progress-ring__circle {
+            stroke: var(--military-accent);
+            stroke-linecap: round;
+            fill: transparent;
+            stroke-width: 8;
+            filter: drop-shadow(0 0 10px var(--military-accent));
+        }
+
+        .tab-nav {
+            display: flex;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+            padding: 0.3rem;
+            margin: 1rem 0;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            background: transparent;
+            border: none;
+            color: #b0b0b0;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+        }
+
+        .tab-button.active {
+            background: var(--military-accent);
+            color: black;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .connection-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--military-accent), transparent);
+            animation: flow 2s linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes flow {
+            0% { opacity: 0.6; transform: scaleX(0); }
+            50% { opacity: 1; transform: scaleX(1); }
+            100% { opacity: 0.6; transform: scaleX(0); }
+        }
+
+        .terminal-output {
+            background: #000;
+            border: 1px solid var(--military-accent);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: var(--military-accent);
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 1rem 0;
+        }
+
+        .system-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .mini-chart {
+            height: 100px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 0.5rem;
+            border: 1px solid var(--military-accent);
+        }
+
+        @media (max-width: 768px) {
+            .main-title { font-size: 1.8rem; }
+            .metric-card { padding: 1rem; }
+            .system-stats { grid-template-columns: 1fr; }
+        }
+
+        .blinking {
+            animation: blink 1s linear infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+    </style>
 </head>
-<body class="bg-dark text-light">
-<div class="container py-4">
-  <h1 class="text-center mb-4">⚔️ MIL-BASTER Real-Time Dashboard</h1>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="container">
+            <h1 class="main-title">
+                <i class="fas fa-shield-alt"></i> MIL-BASTER
+                <small style="font-size: 0.6em; display: block; margin-top: 0.5rem;">
+                    Secure Ad-Hoc Network Command & Control
+                </small>
+            </h1>
+        </div>
+    </header>
 
-  <div class="row">
-    <div class="col-md-6">
-      <canvas id="trustChart"></canvas>
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div>
+            <i class="fas fa-wifi"></i> 
+            <span id="connectionStatus">CONNECTED</span>
+        </div>
+        <div id="currentTime"></div>
+        <div>
+            <i class="fas fa-server"></i> 
+            <span id="nodeCount">100 NODES</span>
+        </div>
     </div>
-    <div class="col-md-6">
-      <canvas id="incidentsChart"></canvas>
+
+    <div class="container-fluid px-4 py-3">
+        <!-- Key Metrics Row -->
+        <div class="row">
+            <div class="col-xl-2 col-md-4 col-sm-6">
+                <div class="metric-card">
+                    <div class="d-flex align-items-center">
+                        <div class="progress-ring">
+                            <svg class="progress-ring" width="60" height="60">
+                                <circle class="progress-ring__circle" stroke="#00ff41" stroke-width="4" 
+                                        fill="transparent" r="25" cx="30" cy="30" 
+                                        id="connectivityCircle"/>
+                            </svg>
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.8rem;" id="connectivityPercent">0%</div>
+                        </div>
+                        <div class="ms-3">
+                            <div class="metric-value" id="networkConnectivity">0%</div>
+                            <div class="metric-label">Network Health</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-sm-6">
+                <div class="metric-card">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-users fa-2x me-3" style="color: var(--military-accent);"></i>
+                        <div>
+                            <div class="metric-value" id="trustedNodes">0</div>
+                            <div class="metric-label">Trusted Nodes</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-sm-6">
+                <div class="metric-card">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle fa-2x me-3" style="color: var(--warning-orange);"></i>
+                        <div>
+                            <div class="metric-value" id="lowTrustNodes">0</div>
+                            <div class="metric-label">Low Trust</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-sm-6">
+                <div class="metric-card">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-bug fa-2x me-3 blinking" style="color: var(--danger-red);"></i>
+                        <div>
+                            <div class="metric-value" id="maliciousNodes">0</div>
+                            <div class="metric-label">Threats</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-sm-6">
+                <div class="metric-card">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exchange-alt fa-2x me-3" style="color: var(--info-blue);"></i>
+                        <div>
+                            <div class="metric-value" id="totalMessages">0</div>
+                            <div class="metric-label">Messages Sent</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-sm-6">
+                <div class="metric-card">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle fa-2x me-3" style="color: var(--success-green);"></i>
+                        <div>
+                            <div class="metric-value" id="successRate">0%</div>
+                            <div class="metric-label">Success Rate</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Content -->
+        <div class="row mt-4">
+            <!-- Network Topology -->
+            <div class="col-xl-8 col-lg-12">
+                <div class="chart-container">
+                    <h3 class="chart-title">
+                        <i class="fas fa-network-wired"></i> REAL-TIME NETWORK TOPOLOGY
+                    </h3>
+                    <div class="network-topology" id="networkTopology">
+                        <!-- Dynamic nodes will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Alerts -->
+            <div class="col-xl-4 col-lg-12">
+                <div class="chart-container">
+                    <h3 class="chart-title">
+                        <i class="fas fa-shield-alt"></i> SECURITY ALERTS
+                        <span class="badge bg-danger ms-2" id="alertCount">0</span>
+                    </h3>
+                    <div class="alert-panel" id="alertPanel">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-shield-alt fa-3x mb-3"></i>
+                            <p>No active threats detected</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Analytics Tabs -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="chart-container">
+                    <div class="tab-nav">
+                        <button class="tab-button active" onclick="switchTab('routing')">
+                            <i class="fas fa-route"></i> ROUTING
+                        </button>
+                        <button class="tab-button" onclick="switchTab('security')">
+                            <i class="fas fa-lock"></i> SECURITY
+                        </button>
+                        <button class="tab-button" onclick="switchTab('performance')">
+                            <i class="fas fa-tachometer-alt"></i> PERFORMANCE
+                        </button>
+                        <button class="tab-button" onclick="switchTab('blockchain')">
+                            <i class="fas fa-link"></i> BLOCKCHAIN
+                        </button>
+                    </div>
+
+                    <!-- Routing Tab -->
+                    <div id="routing-content" class="tab-content active">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <canvas id="aodvChart" style="max-height: 300px;"></canvas>
+                            </div>
+                            <div class="col-md-6">
+                                <canvas id="routeDiscoveryChart" style="max-height: 300px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Tab -->
+                    <div id="security-content" class="tab-content">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <canvas id="trustDistributionChart" style="max-height: 300px;"></canvas>
+                            </div>
+                            <div class="col-md-6">
+                                <canvas id="securityIncidentsChart" style="max-height: 300px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Tab -->
+                    <div id="performance-content" class="tab-content">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <canvas id="messageFlowChart" style="max-height: 300px;"></canvas>
+                            </div>
+                            <div class="col-md-6">
+                                <canvas id="cryptoOperationsChart" style="max-height: 300px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Blockchain Tab -->
+                    <div id="blockchain-content" class="tab-content">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="terminal-output" id="blockchainLogs">
+                                    <div class="text-center">Loading blockchain logs...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Stats Grid -->
+        <div class="system-stats">
+            <div class="mini-chart">
+                <canvas id="miniChart1"></canvas>
+            </div>
+            <div class="mini-chart">
+                <canvas id="miniChart2"></canvas>
+            </div>
+            <div class="mini-chart">
+                <canvas id="miniChart3"></canvas>
+            </div>
+            <div class="mini-chart">
+                <canvas id="miniChart4"></canvas>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div class="row mt-4">
-    <div class="col-md-12">
-      <div id="connectivityGauge"></div>
-    </div>
-  </div>
+    <script>
+        // Global variables
+        let charts = {};
+        let currentStats = {};
+        let alertHistory = [];
+        let simulationNodes = [];
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            updateDashboard();
+            setInterval(updateDashboard, 3000); // Update every 3 seconds
+            setInterval(updateClock, 1000);
+            updateClock();
+        });
 
-  <h3 class="mt-5">📜 Blockchain Logs</h3>
-  <pre id="blockchainLogs" class="bg-black p-3 rounded"></pre>
-</div>
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-content').classList.add('active');
+            event.target.classList.add('active');
+        }
 
-<script>
-async function fetchStats() {
-  const res = await fetch("/stats");
-  return res.json();
-}
+        // Update clock
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString();
+        }
 
-async function fetchLogs() {
-  const res = await fetch("/blockchain_logs");
-  return res.json();
-}
+        // Fetch data from API
+        async function fetchStats() {
+            try {
+                const response = await fetch('/stats');
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching stats:', error);
+                return null;
+            }
+        }
 
-function renderCharts(stats) {
-  // Trust Distribution
-  const trustData = {
-    labels: ["Average Trust", "Low Trust Nodes", "Malicious Nodes"],
-    datasets: [{
-      data: [stats.average_trust, stats.low_trust_nodes, stats.malicious_nodes],
-      backgroundColor: ["#4caf50", "#ff9800", "#f44336"]
-    }]
-  };
-  new Chart(document.getElementById("trustChart"), {
-    type: "doughnut",
-    data: trustData
-  });
+        async function fetchLogs() {
+            try {
+                const response = await fetch('/blockchain_logs');
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching logs:', error);
+                return [];
+            }
+        }
 
-  // Security Incidents Over Time
-  const incidentsData = {
-    labels: ["Anomalies", "Blockchain Events", "Pseudonym Rotations"],
-    datasets: [{
-      data: [stats.anomalies_detected, stats.blockchain_events, stats.pseudonym_rotations],
-      backgroundColor: ["#f44336", "#2196f3", "#9c27b0"]
-    }]
-  };
-  new Chart(document.getElementById("incidentsChart"), {
-    type: "bar",
-    data: incidentsData
-  });
+        // Initialize all charts
+        function initializeCharts() {
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#e0e0e0'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#e0e0e0' },
+                        grid: { color: 'rgba(224, 224, 224, 0.1)' }
+                    },
+                    y: {
+                        ticks: { color: '#e0e0e0' },
+                        grid: { color: 'rgba(224, 224, 224, 0.1)' }
+                    }
+                }
+            };
 
-  // Connectivity Gauge
-  const gaugeData = [{
-    type: "indicator",
-    mode: "gauge+number",
-    value: stats.network_connectivity,
-    title: { text: "Network Connectivity (%)" },
-    gauge: { axis: { range: [0,100] }, bar: { color: "lime" } }
-  }];
-  Plotly.newPlot("connectivityGauge", gaugeData);
-}
+            // AODV Protocol Chart
+            charts.aodv = new Chart(document.getElementById('aodvChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['RREQ Sent', 'RREP Sent', 'Routes Discovered'],
+                    datasets: [{
+                        label: 'AODV Messages',
+                        data: [0, 0, 0],
+                        backgroundColor: ['#ff6384', '#36a2eb', '#4bc0c0']
+                    }]
+                },
+                options: {...chartOptions, plugins: { ...chartOptions.plugins, title: { display: true, text: 'AODV Protocol Activity', color: '#00ff41' }}}
+            });
 
-async function updateDashboard() {
-  const stats = await fetchStats();
-  renderCharts(stats);
-  const logs = await fetchLogs();
-  document.getElementById("blockchainLogs").innerText = JSON.stringify(logs, null, 2);
-}
+            // Trust Distribution Chart
+            charts.trustDistribution = new Chart(document.getElementById('trustDistributionChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Trusted', 'Low Trust', 'Malicious'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#00ff41', '#ff6b35', '#e63946']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Trust Distribution', color: '#00ff41' }}}
+            });
 
-setInterval(updateDashboard, 5000); // refresh every 5s
-updateDashboard();
-</script>
+            // Route Discovery Chart
+            charts.routeDiscovery = new Chart(document.getElementById('routeDiscoveryChart'), {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Routes Discovered',
+                        data: [],
+                        borderColor: '#00ff41',
+                        backgroundColor: 'rgba(0, 255, 65, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: chartOptions
+            });
+
+            // Security Incidents Chart
+            charts.securityIncidents = new Chart(document.getElementById('securityIncidentsChart'), {
+                type: 'radar',
+                data: {
+                    labels: ['Packet Drops', 'Trust Violations', 'Anomalies', 'Blockchain Events', 'Pseudonym Rotations'],
+                    datasets: [{
+                        label: 'Security Metrics',
+                        data: [0, 0, 0, 0, 0],
+                        borderColor: '#e63946',
+                        backgroundColor: 'rgba(230, 57, 70, 0.2)',
+                        pointBackgroundColor: '#e63946'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Security Incidents', color: '#00ff41' }}}
+            });
+
+            // Message Flow Chart
+            charts.messageFlow = new Chart(document.getElementById('messageFlowChart'), {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Messages Sent',
+                            data: [],
+                            borderColor: '#36a2eb',
+                            backgroundColor: 'rgba(54, 162, 235, 0.1)'
+                        },
+                        {
+                            label: 'Successful Deliveries',
+                            data: [],
+                            borderColor: '#4bc0c0',
+                            backgroundColor: 'rgba(75, 192, 192, 0.1)'
+                        }
+                    ]
+                },
+                options: { ...chartOptions, plugins: { ...chartOptions.plugins, title: { display: true, text: 'Message Flow', color: '#00ff41' }}}
+            });
+
+            // Crypto Operations Chart
+            charts.cryptoOperations = new Chart(document.getElementById('cryptoOperationsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Encryptions', 'Signatures', 'Verifications'],
+                    datasets: [{
+                        label: 'Operations',
+                        data: [0, 0, 0],
+                        backgroundColor: ['#9966ff', '#ff9f40', '#ff6384']
+                    }]
+                },
+                options: { ...chartOptions, plugins: { ...chartOptions.plugins, title: { display: true, text: 'Cryptographic Operations', color: '#00ff41' }}}
+            });
+
+            // Mini charts
+            initializeMiniCharts();
+        }
+
+        function initializeMiniCharts() {
+            const miniOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { display: false },
+                    y: { display: false }
+                }
+            };
+
+            charts.mini1 = new Chart(document.getElementById('miniChart1'), {
+                type: 'line',
+                data: {
+                    labels: ['', '', '', '', ''],
+                    datasets: [{ data: [12, 19, 3, 5, 2], borderColor: '#00ff41', fill: true, backgroundColor: 'rgba(0, 255, 65, 0.1)' }]
+                },
+                options: miniOptions
+            });
+
+            charts.mini2 = new Chart(document.getElementById('miniChart2'), {
+                type: 'bar',
+                data: {
+                    labels: ['', '', '', '', ''],
+                    datasets: [{ data: [8, 15, 12, 7, 20], backgroundColor: '#ff6b35' }]
+                },
+                options: miniOptions
+            });
+
+            charts.mini3 = new Chart(document.getElementById('miniChart3'), {
+                type: 'doughnut',
+                data: {
+                    datasets: [{ data: [65, 35], backgroundColor: ['#00ff41', '#e63946'] }]
+                },
+                options: { ...miniOptions, cutout: '60%' }
+            });
+
+            charts.mini4 = new Chart(document.getElementById('miniChart4'), {
+                type: 'polarArea',
+                data: {
+                    datasets: [{ data: [11, 16, 7, 3], backgroundColor: ['#36a2eb', '#ff6384', '#4bc0c0', '#ff9f40'] }]
+                },
+                options: miniOptions
+            });
+        }
+
+        // Update dashboard with new data
+        async function updateDashboard() {
+            const stats = await fetchStats();
+            if (!stats) return;
+
+            currentStats = stats;
+            
+            // Update key metrics
+            updateMetrics(stats);
+            
+            // Update charts
+            updateCharts(stats);
+            
+            // Update network topology
+            updateNetworkTopology(stats);
+            
+            // Update alerts
+            updateAlerts(stats);
+            
+            // Update blockchain logs
+            updateBlockchainLogs();
+        }
+
+        function updateMetrics(stats) {
+            // Update connectivity with animation
+            const connectivity = Math.round(stats.network_connectivity || 0);
+            document.getElementById('networkConnectivity').textContent = connectivity + '%';
+            document.getElementById('connectivityPercent').textContent = connectivity + '%';
+            
+            // Update progress ring
+            const circle = document.getElementById('connectivityCircle');
+            const radius = circle.r.baseVal.value;
+            const circumference = 2 * Math.PI * radius;
+            const strokeDasharray = `${circumference} ${circumference}`;
+            const strokeDashoffset = circumference - (connectivity / 100) * circumference;
+            circle.style.strokeDasharray = strokeDasharray;
+            circle.style.strokeDashoffset = strokeDashoffset;
+
+            // Update other metrics
+            document.getElementById('trustedNodes').textContent = stats.trusted_nodes || 0;
+            document.getElementById('lowTrustNodes').textContent = stats.low_trust_nodes || 0;
+            document.getElementById('maliciousNodes').textContent = stats.malicious_nodes || 0;
+            document.getElementById('totalMessages').textContent = stats.total_messages || 0;
+            document.getElementById('successRate').textContent = Math.round(stats.delivery_success_rate || 0) + '%';
+            document.getElementById('nodeCount').textContent = `${stats.total_nodes || 100} NODES`;
+        }
+
+        function updateCharts(stats) {
+            // Update AODV chart
+            if (charts.aodv) {
+                charts.aodv.data.datasets[0].data = [
+                    stats.rreq_sent || 0,
+                    stats.rrep_sent || 0,
+                    stats.routes_discovered || 0
+                ];
+                charts.aodv.update();
+            }
+
+            // Update trust distribution
+            if (charts.trustDistribution) {
+                charts.trustDistribution.data.datasets[0].data = [
+                    stats.trusted_nodes || 0,
+                    stats.low_trust_nodes || 0,
+                    stats.malicious_nodes || 0
+                ];
+                charts.trustDistribution.update();
+            }
+
+            // Update security incidents radar
+            if (charts.securityIncidents) {
+                charts.securityIncidents.data.datasets[0].data = [
+                    stats.failed_deliveries || 0,
+                    stats.trust_violations || 0,
+                    stats.anomalies_detected || 0,
+                    stats.blockchain_events || 0,
+                    stats.pseudonym_rotations || 0
+                ];
+                charts.securityIncidents.update();
+            }
+
+            // Update crypto operations
+            if (charts.cryptoOperations) {
+                charts.cryptoOperations.data.datasets[0].data = [
+                    stats.encryption_operations || 0,
+                    stats.signature_operations || 0,
+                    stats.signature_operations || 0 // Using same for verifications as demo
+                ];
+                charts.cryptoOperations.update();
+            }
+        }
+
+        function updateNetworkTopology(stats) {
+            const topology = document.getElementById('networkTopology');
+            if (simulationNodes.length === 0) {
+                // Generate random node positions for visualization
+                const nodeCount = stats.total_nodes || 100;
+                simulationNodes = [];
+                
+                for (let i = 0; i < nodeCount; i++) {
+                    simulationNodes.push({
+                        id: i,
+                        x: Math.random() * 360 + 20, // Leave margin
+                        y: Math.random() * 360 + 20,
+                        status: Math.random() > 0.9 ? 'malicious' : (Math.random() > 0.8 ? 'low-trust' : 'trusted')
+                    });
+                }
+            }
+
+            // Clear existing nodes
+            topology.innerHTML = '';
+
+            // Add nodes
+            simulationNodes.forEach(node => {
+                const nodeEl = document.createElement('div');
+                nodeEl.className = `node ${node.status}`;
+                nodeEl.style.left = node.x + 'px';
+                nodeEl.style.top = node.y + 'px';
+                nodeEl.title = `Node ${node.id} - ${node.status.toUpperCase()}`;
+                topology.appendChild(nodeEl);
+            });
+
+            // Add some connection lines between nearby nodes
+            addConnectionLines(topology, simulationNodes);
+        }
+
+        function addConnectionLines(container, nodes) {
+            const connectionCount = Math.min(20, nodes.length * 0.15);
+            for (let i = 0; i < connectionCount; i++) {
+                const node1 = nodes[Math.floor(Math.random() * nodes.length)];
+                const node2 = nodes[Math.floor(Math.random() * nodes.length)];
+                
+                if (node1.id !== node2.id) {
+                    const line = document.createElement('div');
+                    line.className = 'connection-line';
+                    
+                    const distance = Math.sqrt((node2.x - node1.x) ** 2 + (node2.y - node1.y) ** 2);
+                    const angle = Math.atan2(node2.y - node1.y, node2.x - node1.x) * 180 / Math.PI;
+                    
+                    line.style.width = distance + 'px';
+                    line.style.left = node1.x + 10 + 'px';
+                    line.style.top = node1.y + 10 + 'px';
+                    line.style.transform = `rotate(${angle}deg)`;
+                    line.style.transformOrigin = '0 50%';
+                    
+                    container.appendChild(line);
+                }
+            }
+        }
+
+        function updateAlerts(stats) {
+            const alertPanel = document.getElementById('alertPanel');
+            const alertCount = document.getElementById('alertCount');
+            
+            // Generate alerts based on stats
+            const newAlerts = [];
+            
+            if (stats.anomalies_detected > 0) {
+                newAlerts.push({
+                    type: 'THREAT',
+                    message: `${stats.anomalies_detected} anomalies detected in network`,
+                    severity: 'high',
+                    time: new Date().toLocaleTimeString()
+                });
+            }
+            
+            if (stats.malicious_nodes > 0) {
+                newAlerts.push({
+                    type: 'COMPROMISE',
+                    message: `${stats.malicious_nodes} nodes compromised`,
+                    severity: 'critical',
+                    time: new Date().toLocaleTimeString()
+                });
+            }
+            
+            if ((stats.delivery_success_rate || 0) < 50) {
+                newAlerts.push({
+                    type: 'PERFORMANCE',
+                    message: `Low delivery success rate: ${Math.round(stats.delivery_success_rate || 0)}%`,
+                    severity: 'medium',
+                    time: new Date().toLocaleTimeString()
+                });
+            }
+
+            // Add new alerts to history
+            newAlerts.forEach(alert => {
+                if (!alertHistory.some(h => h.message === alert.message)) {
+                    alertHistory.unshift(alert);
+                }
+            });
+
+            // Keep only recent alerts
+            alertHistory = alertHistory.slice(0, 10);
+
+            // Update alert count
+            alertCount.textContent = alertHistory.length;
+
+            // Update alert panel
+            if (alertHistory.length > 0) {
+                alertPanel.innerHTML = alertHistory.map(alert => `
+                    <div class="alert-item">
+                        <strong>[${alert.type}]</strong> ${alert.message}
+                        <div style="font-size: 0.8em; color: #888; margin-top: 0.2rem;">${alert.time}</div>
+                    </div>
+                `).join('');
+            } else {
+                alertPanel.innerHTML = `
+                    <div class="text-center text-muted">
+                        <i class="fas fa-shield-alt fa-3x mb-3"></i>
+                        <p>No active threats detected</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function updateBlockchainLogs() {
+            const logs = await fetchLogs();
+            const logsContainer = document.getElementById('blockchainLogs');
+            
+            if (logs && logs.length > 0) {
+                logsContainer.innerHTML = logs.map(log => `
+                    <div style="margin-bottom: 1rem; padding: 0.5rem; border-left: 2px solid #00ff41;">
+                        <div style="color: #00ff41;">Block #${log.blockNumber || 'N/A'}</div>
+                        <div>TX: ${(log.transactionHash || 'N/A').substring(0, 20)}...</div>
+                        <div>Event: ${log.eventHash || 'N/A'}</div>
+                        <div>Trust Delta: ${log.trustDelta || 'N/A'}</div>
+                    </div>
+                `).join('');
+            } else {
+                logsContainer.innerHTML = `
+                    <div style="color: #888; text-align: center; padding: 2rem;">
+                        <i class="fas fa-link fa-2x mb-3"></i>
+                        <div>No blockchain logs available</div>
+                        <div style="font-size: 0.8rem; margin-top: 1rem;">
+                            Blockchain logging disabled or no events recorded
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Connection status indicator
+        window.addEventListener('online', () => {
+            document.getElementById('connectionStatus').textContent = 'CONNECTED';
+            document.getElementById('connectionStatus').style.color = '#00ff41';
+        });
+
+        window.addEventListener('offline', () => {
+            document.getElementById('connectionStatus').textContent = 'DISCONNECTED';
+            document.getElementById('connectionStatus').style.color = '#e63946';
+        });
+    </script>
 </body>
 </html>
