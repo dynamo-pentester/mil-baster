@@ -47,10 +47,8 @@ Planned features for upcoming milestones:
 ```bash
 git clone https://github.com/dynamo-pentester/mil-baster.git
 cd mil-baster
-(Optional) Create virtual env:
 
-bash
-Copy code
+Create virtual env:
 python -m venv venv
 # Linux/Mac:
 source venv/bin/activate
@@ -58,31 +56,26 @@ source venv/bin/activate
 venv\Scripts\activate
 Install:
 
-bash
-Copy code
+
 pip install -r requirements.txt
 (Optional) Configure blockchain env in .env:
 
-ini
-Copy code
+
 INFURA_SEPOLIA_URL=your_infura_url
 PRIVATE_KEY=your_private_key
 ACCOUNT=your_account
 CONTRACT_ADDR=deployed_contract_address
 Run the simulator:
 
-bash
-Copy code
+
 python -m src.sim_runner
 Example Output
-csharp
-Copy code
+
 [sim][EVIDENCE] recorded evidence rowid=52 ... offender=node3 action=tamper
 [sim][TRUST] Node node3 penalized (-10); new trust=0
 Final anchor result: { 'root': 'f147...', 'tx_hash': '0x5936...', 'block_number': 0, 'count': 16 }
 Project Structure
-css
-Copy code
+
 src/
  ├─ sim_runner.py
  ├─ routing.py
@@ -104,3 +97,4 @@ MIT — Research prototype. Not for production-critical deployments unless harde
 
 Contact
 0x_Dynamo — Developer & Researcher
+
