@@ -1,0 +1,1 @@
+{"event": "packet_drop", "malicious_node": "57", "route": ["36", "57", "15", "76"], "payload_hash": "3fa4b6d5a5ad79bb64318b34ba4eef73437033562432ee2470a5484e04325146", "timestamp": 1757832755.4530897, "position": [906.113295405891, 198.35245167776546], "unit_type": "INFANTRY", "trust_score_before": 0, "pseudonym": "GRUNT_57_129"}

@@ -1,0 +1,1 @@
+{"event": "packet_drop", "malicious_node": "92", "route": ["79", "92", "96", "82"], "payload_hash": "96cb38b38f9ef45bf584ff0bca0cefcee95c10a373687f9a0d1e04ff07b0687a", "timestamp": 1757832776.7424457, "position": [589.4034740452433, 459.1922719917348], "unit_type": "AIR", "trust_score_before": 1, "pseudonym": "BIRD_92_318"}

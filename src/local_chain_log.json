@@ -1,0 +1,74 @@
+[
+  {
+    "blockNumber": 0,
+    "transactionHash": "LOCAL_TEST_EVE",
+    "eventHash": "TEST_EVENT_001",
+    "anomalyType": 2,
+    "trustDelta": -5,
+    "timestamp": "2025-10-10T23:13:20.600038"
+  },
+  {
+    "blockNumber": 0,
+    "transactionHash": "LOCAL_TEST_EVE",
+    "eventHash": "TEST_EVENT_001",
+    "anomalyType": 2,
+    "trustDelta": -5,
+    "timestamp": "2025-10-10T23:20:27.122971"
+  },
+  {
+    "blockNumber": 0,
+    "transactionHash": "LOCAL_TEST_EVE",
+    "eventHash": "TEST_EVENT_001",
+    "anomalyType": 2,
+    "trustDelta": -5,
+    "timestamp": "2025-10-10T23:31:05.589709"
+  },
+  {
+    "blockNumber": 0,
+    "transactionHash": "LOCAL_TEST_EVE",
+    "eventHash": "TEST_EVENT_001",
+    "anomalyType": 2,
+    "trustDelta": -5,
+    "timestamp": "2025-10-10T23:33:37.060286"
+  },
+  {
+    "blockNumber": 0,
+    "transactionHash": "LOCAL_TEST_EVE",
+    "eventHash": "TEST_EVENT_001",
+    "anomalyType": 2,
+    "trustDelta": -5,
+    "timestamp": "2025-10-10T23:34:42.283099"
+  },
+  {
+    "blockNumber": 0,
+    "transactionHash": "LOCAL_TEST_EVE",
+    "eventHash": "TEST_EVENT_001",
+    "anomalyType": 2,
+    "trustDelta": -5,
+    "timestamp": "2025-10-10T23:45:14.272554"
+  },
+  {
+    "blockNumber": 0,
+    "transactionHash": "LOCAL_TEST_EVE",
+    "eventHash": "TEST_EVENT_001",
+    "anomalyType": 2,
+    "trustDelta": -5,
+    "timestamp": "2025-10-10T23:47:12.657653"
+  },
+  {
+    "blockNumber": 0,
+    "transactionHash": "LOCAL_TEST_EVE",
+    "eventHash": "TEST_EVENT_001",
+    "anomalyType": 2,
+    "trustDelta": -5,
+    "timestamp": "2025-10-10T23:47:35.418103"
+  },
+  {
+    "blockNumber": 9387122,
+    "transactionHash": "930d2b557c6eac4cf079d41c3277b2b44def3cd61b6eb094eb062c1b51e124c7",
+    "eventHash": "TEST_EVENT_001",
+    "anomalyType": 2,
+    "trustDelta": -5,
+    "timestamp": "2025-10-10T23:51:37.055606"
+  }
+]

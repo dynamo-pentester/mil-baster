@@ -16,6 +16,7 @@ eventlet==0.33.3
 plotly==5.17.0
 pandas==2.1.4
 numpy==1.26.2
+pymerkle==5.0.0
 
 # Network Simulation & Math
 networkx==3.2.1

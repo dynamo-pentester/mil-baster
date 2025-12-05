@@ -1,95 +1,113 @@
-# crypto_utils.py
-# ECC/ECDH/ECDSA helpers, AES-GCM, key derivation, small helpers.
-
-from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives import hashes, serialization
+# src/crypto_utils.py
+import os
+import json
+import hashlib
+from cryptography.hazmat.primitives.asymmetric import ec, utils
+from cryptography.hazmat.primitives import hashes, serialization, hmac
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-import os
-import base64
-import hashlib
+from cryptography.hazmat.backends import default_backend
 from typing import Tuple
 
-# ECDSA / ECDH key generation (P-256)
-def gen_keypair() -> Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]:
-    priv = ec.generate_private_key(ec.SECP256R1())
-    pub = priv.public_key()
-    return priv, pub
+KEYSTORE_DIR = os.environ.get("MILBASTER_KEYSTORE", "keystore")
 
-def privkey_to_pem(priv: ec.EllipticCurvePrivateKey) -> bytes:
-    return priv.private_bytes(
+def ensure_keystore():
+    if not os.path.exists(KEYSTORE_DIR):
+        os.makedirs(KEYSTORE_DIR, exist_ok=True)
+
+def gen_node_keypair(node_id: str) -> Tuple[bytes, bytes]:
+    """
+    Generates an EC keypair and saves private key to keystore/node_id_priv.pem
+    Returns (private_bytes, public_bytes)
+    """
+    ensure_keystore()
+    priv = ec.generate_private_key(ec.SECP256R1(), default_backend())
+    priv_pem = priv.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
         encryption_algorithm=serialization.NoEncryption()
     )
-
-def pubkey_to_pem(pub: ec.EllipticCurvePublicKey) -> bytes:
-    return pub.public_bytes(
+    pub = priv.public_key()
+    pub_pem = pub.public_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
+    with open(os.path.join(KEYSTORE_DIR, f"{node_id}_priv.pem"), "wb") as f:
+        f.write(priv_pem)
+    with open(os.path.join(KEYSTORE_DIR, f"{node_id}_pub.pem"), "wb") as f:
+        f.write(pub_pem)
+    return priv_pem, pub_pem
 
-def load_pubkey_from_pem(pem_bytes: bytes):
-    return serialization.load_pem_public_key(pem_bytes)
+def load_node_private_key(node_id: str):
+    ensure_keystore()
+    path = os.path.join(KEYSTORE_DIR, f"{node_id}_priv.pem")
+    if not os.path.exists(path):
+        # generate ephemeral keys for demos, but in production provision keys properly
+        gen_node_keypair(node_id)
+    with open(path, "rb") as f:
+        data = f.read()
+    priv = serialization.load_pem_private_key(data, password=None, backend=default_backend())
+    return priv
 
-# ECDSA sign/verify
-def sign_message(priv: ec.EllipticCurvePrivateKey, message_bytes: bytes) -> bytes:
-    return priv.sign(message_bytes, ec.ECDSA(hashes.SHA256()))
+def load_node_public_bytes(node_id: str) -> bytes:
+    path = os.path.join(KEYSTORE_DIR, f"{node_id}_pub.pem")
+    if not os.path.exists(path):
+        _, pub = gen_node_keypair(node_id)
+        return pub
+    with open(path, "rb") as f:
+        return f.read()
 
-def verify_signature(pub, message_bytes: bytes, signature: bytes) -> bool:
+def sign_message(priv_key_obj, message: bytes) -> bytes:
+    sig = priv_key_obj.sign(message, ec.ECDSA(hashes.SHA256()))
+    return sig
+
+def verify_signature(pub_key_bytes: bytes, message: bytes, signature: bytes) -> bool:
+    pub = serialization.load_pem_public_key(pub_key_bytes, backend=default_backend())
     try:
-        pub.verify(signature, message_bytes, ec.ECDSA(hashes.SHA256()))
+        pub.verify(signature, message, ec.ECDSA(hashes.SHA256()))
         return True
     except Exception:
         return False
 
-# ECDH ephemeral shared key derivation
-def derive_shared_key(priv: ec.EllipticCurvePrivateKey, peer_pub, length=32) -> bytes:
-    shared = priv.exchange(ec.ECDH(), peer_pub)
-    derived = HKDF(
-        algorithm=hashes.SHA256(),
-        length=length,
-        salt=None,
-        info=b"mil-baster session key",
-    ).derive(shared)
-    return derived
+def derive_shared_key(node_id: str, peer_pub_bytes: bytes) -> bytes:
+    """
+    Derive a 32-byte symmetric key using ECDH between this node and peer_pub.
+    If peer_pub_bytes is None, return a node-specific static symmetric key derived via HKDF (NOT ideal for prod).
+    """
+    priv = load_node_private_key(node_id)
+    if peer_pub_bytes:
+        peer_pub = serialization.load_pem_public_key(peer_pub_bytes, backend=default_backend())
+        shared = priv.exchange(ec.ECDH(), peer_pub)
+        # HKDF derive
+        hkdf = HKDF(algorithm=hashes.SHA256(), length=32, salt=None, info=b"milbaster-evidence", backend=default_backend())
+        return hkdf.derive(shared)
+    else:
+        # fallback: derive from node public key bytes
+        pub_bytes = load_node_public_bytes(node_id)
+        hkdf = HKDF(algorithm=hashes.SHA256(), length=32, salt=None, info=b"milbaster-node-static", backend=default_backend())
+        return hkdf.derive(hashlib.sha256(pub_bytes).digest())
 
-# AES-GCM helpers (key must be 16/24/32 bytes)
-def aes_gcm_encrypt(key: bytes, plaintext: bytes, aad: bytes = None) -> bytes:
-    if len(key) not in (16, 24, 32):
-        raise ValueError("AESGCM key must be 128, 192, or 256 bits (16/24/32 bytes)")
+# convenience wrapper used by evidence_manager: derive_node_symmetric_key
+def derive_node_symmetric_key(node_id: str, peer_pubkey_bytes: bytes=None) -> bytes:
+    return derive_shared_key(node_id, peer_pubkey_bytes)
+
+def aes_gcm_encrypt(key: bytes, plaintext: bytes) -> Tuple[bytes, bytes, bytes]:
+    """
+    returns (ciphertext, nonce, tag)
+    We'll use AESGCM which returns ciphertext including tag; to be explicit, we split.
+    """
     aesgcm = AESGCM(key)
     nonce = os.urandom(12)
-    ct = aesgcm.encrypt(nonce, plaintext, aad)
-    return nonce + ct
+    ct = aesgcm.encrypt(nonce, plaintext, None)
+    # AESGCM returns ciphertext||tag (tag is last 16 bytes)
+    tag = ct[-16:]
+    ciphertext = ct[:-16]
+    return ciphertext, nonce, tag
 
-def aes_gcm_decrypt(key: bytes, nonce_and_ct: bytes, aad: bytes = None) -> bytes:
-    if len(key) not in (16, 24, 32):
-        raise ValueError("AESGCM key must be 128, 192, or 256 bits (16/24/32 bytes)")
+def aes_gcm_decrypt(key: bytes, nonce: bytes, tag: bytes, ciphertext: bytes) -> bytes:
     aesgcm = AESGCM(key)
-    nonce = nonce_and_ct[:12]
-    ct = nonce_and_ct[12:]
-    return aesgcm.decrypt(nonce, ct, aad)
+    return aesgcm.decrypt(nonce, ciphertext + tag, None)
 
-def sha256_hex(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
-
-# base64 helpers
-def b64(x: bytes) -> str:
-    return base64.b64encode(x).decode()
-
-def ub64(s: str) -> bytes:
-    return base64.b64decode(s.encode())
-
-# AES key helpers
-def generate_aes_key(bits: int = 256) -> bytes:
-    if bits not in (128, 192, 256):
-        raise ValueError("bits must be 128,192,256")
-    return os.urandom(bits // 8)
-
-def derive_aes_key(passphrase: str, bits: int = 256) -> bytes:
-    if bits not in (128, 192, 256):
-        raise ValueError("bits must be 128,192,256")
-    # simple deterministic derivation for demo (SHA256)
-    full = hashlib.sha256(passphrase.encode()).digest()
-    return full[: bits // 8]
+def sha256_hex(b: bytes) -> str:
+    import hashlib
+    return hashlib.sha256(b).hexdigest()
