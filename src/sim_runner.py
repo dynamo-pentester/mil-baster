@@ -1,18 +1,4 @@
 # src/sim_runner.py
-"""
-Simulation runner for MIL-BASTER (updated)
-
-- Initializes DB and keystore (demo mode)
-- Creates N nodes with keypairs (if missing)
-- Simulates simple routing/forwarding with occasional malicious behavior
-- On detection, creates signed+encrypted evidence and persists it
-- Runs an anchor worker in background to batch/anchor evidence to chain
-- Shows trust updates and simple stats
-
-Run:
-    python -m src.sim_runner
-"""
-
 import os
 import time
 import random
