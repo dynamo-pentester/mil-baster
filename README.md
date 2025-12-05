@@ -1,151 +1,106 @@
-# 🛡️ MIL-BASTER: Military-Grade Blockchain-Assisted Secure Routing
+# 🛡️ MIL-BASTER – Military Ad-Hoc Network Security Platform
 
-Next-generation secure routing with dynamic trust management and tamper-proof audit trails for Mobile Ad-hoc Networks (MANETs)
-
-![Intro](https://media.giphy.com/media/du3J3cXyzhj75IOgvA/giphy.gif)
-
-## 🎯 Problem Statement
-
-Military communication networks are highly susceptible to sophisticated threats, including data tampering, packet dropping, and identity compromise. Current solutions lack a robust, dynamic trust management system and a tamper-proof mechanism for auditing network anomalies, making them vulnerable to insider attacks and operational disruptions.
-
-## ⚡ Our Solution
-
-MIL-BASTER is a comprehensive security framework for Mobile Ad-hoc Networks (MANETs) that integrates real-time anomaly detection, dynamic trust management, and a blockchain-based audit trail. This solution ensures the integrity, confidentiality, and resilience of critical communication, providing a self-healing and secure network environment for military applications.
-
-Key Features:
-- Real-time Anomaly Detection: Utilizes a sliding window analysis to immediately identify and flag anomalous behavior, such as dropped packets or unauthorized data manipulation.
-
-![Detection](https://github.com/user-attachments/assets/c53140aa-2a55-4ad5-840d-b7edb7737b29)
-
-- Dynamic Trust Scoring: Employs a reputation-based system where each node's trust score is dynamically adjusted based on its network behavior.
-
-![Trust](https://media.giphy.com/media/l41lVsYDBC0UVQJCE/giphy.gif)
-
-Successful packet transmission: +1 point
-
-Packet drop or tampering: -20 points
-
-Nodes with a score below 50 are automatically excluded from routing.
-
-- Onion Routing with ECC Encryption: Provides a multi-layered cryptographic approach to secure data.
-
-![Encryption](https://github.com/user-attachments/assets/8afbd3c3-0bbb-4197-81d8-8f98f4b66f66)
-
-ECDSA Signatures: Ensures data origin authentication and integrity.
-
-ECDH Key Exchange: Establishes secure, ephemeral session keys between nodes.
-
-AES-GCM: Guarantees confidentiality and authenticated encryption of the data payload.
-
-- Blockchain Audit Trail: All security-relevant events, including trust score updates and anomaly logs, are recorded on a blockchain. This provides a decentralized, tamper-proof, and transparent record for forensic analysis and accountability.
-
-- Adaptive Routing: The system intelligently selects the most trustworthy and efficient routing paths, dynamically adapting to exclude compromised or low-trust nodes, thereby enhancing network resilience.
-
-## 🚀 Quick Start
-
-To run the MIL-BASTER simulation, follow these steps:
-
-1. Clone the repository:
-```
-git clone https://github.com/dynamo-pentester/mil-baster.git
-cd mil-baster
-```
-
-2. Set up the Python virtual environment:
-```
-python -m venv venv
-source venv/bin/activate  # Use 'venv\Scripts\activate' on Windows
-```
-
-3. Install the required dependencies:
-```
-pip install -r requirements.txt
-```
-
-4. Configure environment variables (optional for blockchain features):
-Create a `.env` file with:
-```
-INFURA_SEPOLIA_URL=your_infura_sepolia_rpc_url
-DEMO_PRIVATE_KEY=your_private_key
-DEMO_ACCOUNT=your_account_address
-CONTRACT_ADDR=deployed_contract_address
-```
-
-5. Run the simulation:
-```
-python -m src.sim_runner
-```
-
-## 🔐 Technology Stack
-
-- Simulation: Python 3.11 with asyncio for concurrent network simulations.
-- Cryptography: Implemented using industry-standard libraries for ECDSA, ECDH, and AES-GCM.
-- Database: SQLite for local node data persistence and PostgreSQL for scalable, production-grade network-wide data management.
-- Blockchain: A custom Solidity smart contract is deployed on the Sepolia test network, with interactions managed via Web3.py.
-- Monitoring: Real-time dashboards and logs provide insights into trust scores and anomaly detection events.
-- Web Dashboard: Flask + SocketIO + Plotly for real-time visualization.
-
-## 📊 Demo Output
-
-🎯 SIMULATION STARTED: 100 nodes, several malicious nodes present
-[ANOMALY] 🚨 Node 45 dropped packet from 12→78, Trust: 100 → 80
-[TRUST] 🔒 Excluding low-trust nodes from routing
-
-## 🏗️ Architecture
-
-The MIL-BASTER architecture is designed for modularity and scalability. Each network node runs a micro-service-based stack:
-
-[MANET Nodes] → [Anomaly Detection] → [Trust Engine] → [SQLite DB]
-↓
-[Blockchain Integration]
-
-- MANET Nodes: Simulates the physical hardware, including communication interfaces.
-- Anomaly Detection: A service that monitors packet flow and network behavior.
-- Trust Engine: A core service that calculates and updates node trust scores.
-- SQLite DB: Stores local trust scores and historical data for quick access.
-- Blockchain Integration: A service responsible for hashing and logging critical events onto the Sepolia testnet.
-
-## 📁 Project Structure
-
-- `src/`: Core simulation and protocol implementation
-  - `sim_runner.py`: Main simulation orchestrator
-  - `aodv_protocol.py`: AODV routing protocol with security extensions
-  - `models.py`: Node and network models
-  - `crypto_utils.py`: Cryptographic utilities
-  - `web3_utils.py`: Blockchain integration
-  - `trust.py`: Trust scoring system
-  - `monitoring.py`: Anomaly detection
-  - `db_utils.py`: Database operations
-- `contracts/`: Smart contract source code
-- `dashboard/`: Web dashboard frontend and backend
-- `scripts/`: Deployment and demo scripts
-- `MILBASTERLog_abi.json`: ABI for the smart contract
-
-## 🌐 Web Dashboard
-
-Start the real-time monitoring dashboard:
-```
-run dashboard.html
-```
-Access at http://localhost:5000 for live network visualization.
-
-## 🧪 Testing
-
-Run unit tests:
-```
-pytest
-```
-
-## 🤝 Contributing
-
-Contributions welcome! Please open issues or PRs for improvements.
-
-## 📄 License
-
-MIT License
+Next-generation secure routing with dynamic trust management and tamper-proof audit trails for Mobile Ad-hoc Networks (MANETs).
 
 ---
-Built for defense-grade deployment in UAV swarms, soldier mesh networks, and vehicle-to-vehicle communication.
 
+## Overview
 
+MIL-BASTER is a research prototype that simulates adversarial MANET environments, detects malicious routing behavior (packet drops and tampering), generates cryptographically verifiable forensic evidence, and secures that evidence using Merkle-tree batching with optional blockchain anchoring. The system demonstrates a complete evidence lifecycle: detection → sign → encrypt → store → batch → anchor.
 
+---
+
+## Key Features (Implemented)
+
+- **Adversarial Routing Simulation** — AODV-inspired multi-hop message forwarding and route simulation.
+- **Malicious Behavior Detection** — Automatic detection of packet **drop** and **tamper** events during forwarding.
+- **Dynamic Trust Engine** — Reputation scores per node (configurable penalties: tamper = −10, drop = −20); nodes reaching a threshold (0) are classified malicious.
+- **Cryptographic Evidence** — Each security event is recorded as a signed (Ed25519) and AES-GCM encrypted evidence package.
+- **Local Forensic Store** — Evidence persisted in an on-disk SQLite database for auditability.
+- **Merkle Tree Batching** — Periodic Merkle tree construction over evidence; proofs are stored with each evidence item.
+- **Blockchain Anchoring (Sepolia)** — Merkle roots can be anchored to Ethereum (Sepolia testnet) via Web3. Anchoring has robust fallback: local cache & retry logic when RPC or keys are unavailable.
+- **Secure Key Keystore** — Demo keystore for keys; designed to be replaced with TPM/HSM in production.
+
+---
+
+## What is *not* implemented (and why)
+
+- **Onion Routing (NOT implemented yet)** — The current prototype does **not** perform multi-layer per-hop encryption (onion routing). The project implements end-to-end signed and encrypted evidence logging, but routing messages are forwarded with standard AODV-style behavior. Onion routing is planned as a future enhancement (see Roadmap).
+
+---
+
+## Roadmap / Future Work
+
+Planned features for upcoming milestones:
+
+- **Onion Routing (Future Implementation)**: Multi-layer encryption with per-hop ECDH-derived keys (X25519 + AES-GCM), so intermediate hops cannot read payloads or link source/destination beyond their immediate neighbor.
+- **Hardware Key Protection**: TPM/HSM integration for private keys to ensure forensic non-repudiation.
+- **Asynchronous Anchor Queue**: Dedicated sender/reconciler to guarantee on-chain anchoring without blocking simulation.
+- **Distributed Storage Option**: Integrate IPFS or similar for storing large forensic blobs with on-chain index pointers.
+- **Performance Benchmarks**: Latency and bandwidth tests for large topologies and message sizes.
+
+---
+
+## Quick Start
+
+1. Clone:
+```bash
+git clone https://github.com/dynamo-pentester/mil-baster.git
+cd mil-baster
+(Optional) Create virtual env:
+
+bash
+Copy code
+python -m venv venv
+# Linux/Mac:
+source venv/bin/activate
+# Windows:
+venv\Scripts\activate
+Install:
+
+bash
+Copy code
+pip install -r requirements.txt
+(Optional) Configure blockchain env in .env:
+
+ini
+Copy code
+INFURA_SEPOLIA_URL=your_infura_url
+PRIVATE_KEY=your_private_key
+ACCOUNT=your_account
+CONTRACT_ADDR=deployed_contract_address
+Run the simulator:
+
+bash
+Copy code
+python -m src.sim_runner
+Example Output
+csharp
+Copy code
+[sim][EVIDENCE] recorded evidence rowid=52 ... offender=node3 action=tamper
+[sim][TRUST] Node node3 penalized (-10); new trust=0
+Final anchor result: { 'root': 'f147...', 'tx_hash': '0x5936...', 'block_number': 0, 'count': 16 }
+Project Structure
+css
+Copy code
+src/
+ ├─ sim_runner.py
+ ├─ routing.py
+ ├─ trust.py
+ ├─ crypto_utils.py
+ ├─ evidence_manager.py
+ ├─ merkle_utils.py
+ ├─ web3_utils.py
+ ├─ db_utils.py
+contracts/
+ └─ MILBASTERLog.sol
+Verification & Demo
+Use tools/verify_evidence.py <rowid> to verify signature + Merkle proof for a saved evidence row.
+
+Inspect milbaster.db to see evidence rows and anchors.
+
+License
+MIT — Research prototype. Not for production-critical deployments unless hardened with TPM/HSM and audited.
+
+Contact
+0x_Dynamo — Developer & Researcher
